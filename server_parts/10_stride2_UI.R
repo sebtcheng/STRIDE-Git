@@ -783,25 +783,47 @@ output$STRIDE2 <- renderUI({
     # --- mySTRIDE PANEL ---
     nav_panel(
       value = "mystride_nav", # This value is correct
-      title = tags$b("mySTRIDE"),
+      title = tags$b("InsightEd"),
       icon = bs_icon("box-arrow-right"),
       
-      h3("mySTRIDE Access"),
+      h3("EnsightEd Access"),
       fluidRow(
         column(
           width = 6, 
           offset = 3, 
           class = "mt-5 mb-5",
-          style = "text-align: center;", 
+          
+          # We remove all centering from the card...
           bslib::card( 
-            tags$h5("Access mySTRIDE here"),
+            
+            # ...and instead add an explicit card_body with flexbox styles
+            card_body(
+              style = "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+            
+            tags$img(src = "InsightEd.png", 
+                     alt = "InsightEd Logo",
+                     style = "width: 285px; height: auto; margin-bottom: 20px;"),
+            
+            tags$h5("Access InsightEd here"),
             div(
               style = "text-align:center; margin-top: 20px;", 
               actionButton(
                 inputId = "goto_dashboard_btn", 
-                label = "mySTRIDE",
-                class = "go-dashboard-btn" 
+                label = "Open InsightEd Dashboard", # Made label clearer
+                class = "go-dashboard-btn btn-lg" # Made button larger
               )
+            ),
+            
+            # --- 3. ADDED SEPARATOR & QR CODE ---
+            hr(style = "margin: 30px 0; border-top: 2px solid #eee;"),
+            
+            tags$h5("Scan for Mobile Access"),
+            tags$img(src = "InsightEdQR.png",
+                     alt = "InsightEd QR Code",
+                     style = "width: 250px; height: auto; margin-top: 15px; border: 1px solid #ddd; padding: 5px; border-radius: 8px;"),
+            
+            tags$p("Scan the code to open the dashboard on your mobile device.",
+                   style = "margin-top: 15px; font-style: italic; color: #555;")
             )
           ) # End bslib::card
         ) # End column

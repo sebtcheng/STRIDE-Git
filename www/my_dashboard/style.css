@@ -5,7 +5,7 @@ html {
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f4f4;
     color: #333;
     line-height: 1.6;
@@ -17,15 +17,73 @@ body {
 }
 
 /* --- Landing Page Styles (Unchanged) --- */
+/* 1. The Main Page Container */
 #landingPage {
-    display: flex;
+    display: flex; /* We'll use flex to center the content container */
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     padding: 20px;
     box-sizing: border-box;
-    background-color: #f4f4f4;
+    
+    /* CRITICAL: This allows us to position shapes inside it */
+    position: relative; 
+    overflow: hidden; /* Hides shapes that float off-screen */
+
+    /* You can add a subtle background gradient here if you like */
+    background-color: #f7faff; /* A very light blue-white */
+}
+
+/* 3. The Individual Shapes */
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    /* This blur gives the soft, out-of-focus look from the image */
+    filter: blur(50px); 
+    opacity: 0.7;
+}
+
+.shape1 {
+    width: 200px;
+    height: 200px;
+    background: #3B82F6; /* Blue */
+    top: 10%;
+    left: 10%;
+}
+
+.shape2 {
+    width: 150px;
+    height: 150px;
+    background: #F87171; /* Pink/Red */
+    top: 20%;
+    right: 15%;
+}
+
+.shape3 {
+    width: 250px;
+    height: 250px;
+    background: #FBBF24; /* Orange/Yellow */
+    bottom: 10%;
+    left: 20%;
+}
+
+.shape4 {
+    width: 180px;
+    height: 180px;
+    background: #2a8c4a; /* Your app's green */
+    bottom: 15%;
+    right: 10%;
+}
+
+
+.landing-shapes-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Sits behind the content */
 }
 
 #landingPage h1 {
@@ -256,4 +314,56 @@ button {
 
 .clear-btn:hover {
     background-color: #8b3a3a;
+}
+
+/* --- NEW: Interactive UI Upgrades --- */
+
+/* 1. Modern Focus Style for Inputs */
+/* This adds a green glow when you click/tap an input */
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: #2a8c4a; /* Your primary green color */
+    box-shadow: 0 0 0 3px rgba(42, 140, 74, 0.2); /* A soft glow */
+    outline: none; /* Removes the default blue outline */
+}
+
+/* 2. Button Hover "Lift" Effect */
+/* This makes buttons feel more clickable */
+button {
+    /* Add 'transform' to your existing 'transition' */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#nextBtn:hover,
+#submitBtn:hover,
+#prevBtn:hover,
+.clear-btn:hover {
+    /* Lifts the button up slightly */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Adds a subtle shadow */
+}
+
+/* --- NEW: Toast Notification Styles --- */
+#toastNotification {
+    position: fixed; /* Stays on screen */
+    bottom: -100px; /* Starts hidden off-screen */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: bottom 0.5s ease-in-out;
+}
+
+/* This class will be added by JavaScript to show the toast */
+#toastNotification.show {
+    bottom: 30px; /* Slides it onto the screen */
 }

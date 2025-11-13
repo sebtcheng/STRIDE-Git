@@ -46,6 +46,23 @@ if ('serviceWorker' in navigator) {
 }
 // --- END: Robust Instant Update Logic ---
 
+// --- NEW: Toast Notification Function ---
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const msg = document.getElementById('toastMessage');
+    
+    if (!toast || !msg) return; // Failsafe
+
+    msg.textContent = message;
+    toast.classList.add('show');
+
+    // Hide the toast after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+// --- END: Toast Notification Function ---
+
 
 // --- MODIFIED: Landing Page Logic ---
 const landingPage = document.getElementById('landingPage');
@@ -238,21 +255,25 @@ if (surveyForm) {
 
         // Save the complete data to IndexedDB
         addSurveyToDB(surveyData)
-            .then(() => {
-                console.log('Full survey saved to IndexedDB.');
-                alert('Thank you! Your survey has been saved and will sync when online.');
+    .then(() => {
+        console.log('Full survey saved to IndexedDB.');
+        
+        // --- THIS IS THE MODIFIED LINE ---
+        showToast('Survey saved successfully!'); // Replaces alert()
+        // --- END OF MODIFICATION ---
 
-                // Clear the form and the draft
-                surveyForm.reset();
-                clearDraft();
-                
-                // Go back to the first page
-                showPage(0);
-            })
-            .catch((err) => {
-                console.error('Failed to save full survey:', err);
-                alert('There was an error saving your survey.');
-            });
+        // Clear the form and the draft
+        surveyForm.reset();
+        clearDraft();
+        
+        // Go back to the first page
+        showPage(0);
+    })
+    .catch((err) => {
+        console.error('Failed to save full survey:', err);
+        // --- (Optional) You can use it for errors too! ---
+        showToast('Error: Failed to save survey.'); // Replaces alert()
+    });
     });
 }
 
