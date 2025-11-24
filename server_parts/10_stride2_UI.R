@@ -949,12 +949,10 @@ output$STRIDE2 <- renderUI({
           column(width = 6, card(card_header(tags$b("Data View 6")), card_body(pickerInput(inputId = "cloud_category_picker_6", label = NULL, choices = c("Enrolment Data" = "cloud_enrolment", "SNED Learners" = "cloud_sned", "IP Learners" = "cloud_ip", "Muslim Learners" = "cloud_muslim", "Displaced Learners" = "cloud_displaced", "ALS Learners" = "cloud_als", "Dropout Data" = "cloud_dropout", "Teacher Inventory" = "cloud_teacherinventory", "Years in Service" = "cloud_years", "Classroom Inventory" = "cloud_classroom", "Multigrade" = "cloud_multigrade", "Organized Class" = "cloud_organizedclass", "JHS Teacher Deployment" = "cloud_jhsdeployment", "Shifting" = "cloud_shifting", "Learning Delivery Modality" = "cloud_LDM", "ARAL" = "cloud_ARAL", "CRLA" = "cloud_crla", "PhilIRI" = "cloud_philiri", "Alternative Delivery Modality" = "cloud_adm", "Reading Proficiency" = "cloud_rf", "Electricity Source" = "cloud_elec", "Water Source" = "cloud_water", "Internet Source" = "cloud_internet", "Internet Usage" = "cloud_internet_usage", "BulGlying Incidence" = "cloud_bully", "Overload Pay" = "cloud_overload", "School Resources" = "cloud_resources", "NAT" = "cloud_nat", "NAT Sufficiency" = "cloud_nat_sufficiency", "LAC" = "cloud_lac", "Feeding Program" = "cloud_feeding", "SHA" = "cloud_sha"), selected = "cloud_enrolment", multiple = FALSE, options = pickerOptions(liveSearch = TRUE, title = "Select Category")), uiOutput("cloud_graph_6"))))
         )
       )
-    ) # End CLOUD nav_menu
-  )
-  
-  
-  # --- 4. Define the nav items only for AUTHENTICATED (non-guest) users ---
-  nav_list_auth_only <- list(
+    ), # End CLOUD nav_menu
+    
+    # --- 4. Define the nav items only for AUTHENTICATED (non-guest) users ---
+    # nav_list_auth_only <- list(
     
     # --- DATA EXPLORER MENU ---
     nav_menu(
@@ -984,7 +982,11 @@ output$STRIDE2 <- renderUI({
           )
         ) # End layout_sidebar
       ) # End nav_panel
-    ) # End Data Explorer nav_menu
+    )
+  )
+  
+  
+   # End Data Explorer nav_menu
     # 
     # # --- mySTRIDE PANEL ---
     # nav_panel(
@@ -1019,17 +1021,13 @@ output$STRIDE2 <- renderUI({
     #     ) # End column
     #   ) # End fluidRow
     # )
-  )
+  # )
   
   
   # --- 5. Combine the lists based on user role ---
   
-  final_nav_list <- nav_list_base # Start with the base list
-  
-  if (!is_guest) {
-    # If NOT a guest, add the auth-only items
-    final_nav_list <- c(final_nav_list, nav_list_auth_only)
-  }
+    # --- 5. Use the single list for everyone ---
+    final_nav_list <- nav_list_base
   
   # --- 6. Build the page_navbar dynamically ---
   # We pass the final list of nav items to do.call
