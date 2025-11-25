@@ -564,6 +564,14 @@ output$STRIDE2 <- renderUI({
             width = 350,
             title = "Dashboard Controls",
             uiOutput("back_button_ui"),
+            
+            conditionalPanel(
+              condition = "input.erdb_content_tabs == 'School Locator'",
+              hr(),
+              h4(strong("Actions")),
+              downloadButton("download_dashboard_school_profile", "Download Summary", class = "btn-danger w-100")
+            ),
+            
             hr(), 
             h4(strong("Dashboard Presets")),
             tags$div(
@@ -820,35 +828,39 @@ output$STRIDE2 <- renderUI({
           card(full_screen = TRUE, card_header(strong("School Mapping")), leafletOutput("TextMapping", height = 500, width = "100%")),
           
           # Column 3: Detailed Breakdown (Full Width)
+          # ... inside Quick Search layout_columns ...
+          
+          # --- REPLACE THIS CARD BLOCK ---
           card(
             full_screen = TRUE,
-            card_header(div(strong("School Details"), tags$span(em("(Select a school from the table above)"), style = "font-size: 0.7em; color: grey;"))),
-            
+            card_header(
+              div(
+                class = "d-flex justify-content-between align-items-center",
+                div(
+                  strong("School Details"), 
+                  tags$span(em("(Select a school from the table above)"), style = "font-size: 0.7em; color: grey;")
+                ),
+                # --- NEW: Download Button ---
+                downloadButton("download_school_profile", "Download Summary", class = "btn-sm btn-danger") 
+              )
+            ),
             tagList(
               layout_columns(
                 col_widths = c(6,6),
-              # Row 1: Basic Info
-              card(card_header(strong("Basic Information")), tableOutput("qs_basic")),
-              card(card_header(strong("Location")), tableOutput("qs_location"))),
-              
-              
-              # Row 2: Enrolment & Teachers
+                card(card_header(strong("Basic Information")), tableOutput("qs_basic")),
+                card(card_header(strong("Location")), tableOutput("qs_location"))),
               layout_columns(
                 col_widths = c(4, 4, 4),
                 card(card_header(strong("Enrolment Profile")), tableOutput("qs_enrolment")),
                 card(card_header(strong("Teacher Inventory")), tableOutput("qs_teachers")),
                 card(card_header(strong("Teacher Needs")), tableOutput("qs_teacher_needs"))
               ),
-              
-              # Row 3: Infrastructure
               layout_columns(
                 col_widths = c(4, 4, 4),
                 card(card_header(strong("Classroom Inventory")), tableOutput("qs_classrooms")),
                 card(card_header(strong("Classroom Needs")), tableOutput("qs_classroom_needs")),
                 card(card_header(strong("Utilities & Facilities")), tableOutput("qs_utilities"))
               ),
-              
-              # Row 4: Others
               layout_columns(
                 col_widths = c(6, 6),
                 card(card_header(strong("Non-Teaching Personnel")), tableOutput("qs_ntp")),
@@ -856,6 +868,7 @@ output$STRIDE2 <- renderUI({
               )
             )
           ),
+          # ... rest of layout ...,
           col_widths = c(6, 6, 12)
         ) 
       ) # End layout_sidebar

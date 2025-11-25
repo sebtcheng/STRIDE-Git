@@ -28,6 +28,10 @@ library(RPostgres)
 library(pool)
 library(reactable)
 library(reactablefmtr)
+library(kableExtra)
+library(rmarkdown)
+library(knitr)
+library(tinytex)
 
 
 # HROD Data Upload

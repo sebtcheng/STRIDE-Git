@@ -376,6 +376,7 @@ observeEvent(input$preset_roomcondition, {
 
 
 # --- *** UPDATED: Conditional UI for Data Explorer Tab *** ---
+# --- *** UPDATED: Conditional UI for Data Explorer Tab *** ---
 output$data_explorer_content <- renderUI({
   
   state <- global_drill_state()
@@ -402,11 +403,11 @@ output$data_explorer_content <- renderUI({
     # Render the map/table/details UI
     tagList(
       
-      # --- SECTION 1: Map and Table (SWAPPED) ---
+      # --- SECTION 1: Map and Table ---
       bslib::layout_columns(
         col_widths = c(6, 6), 
         
-        # --- Column 1: Datatable (MOVED) ---
+        # --- Column 1: Datatable ---
         bslib::card(
           full_screen = TRUE,
           bslib::card_header("Filtered Data (Click a row)"),
@@ -415,7 +416,7 @@ output$data_explorer_content <- renderUI({
           )
         ),
         
-        # --- Column 2: Leaflet Map (MOVED) ---
+        # --- Column 2: Leaflet Map ---
         bslib::card(
           full_screen = TRUE,
           bslib::card_header("School Map (Click a school)"),
@@ -428,10 +429,17 @@ output$data_explorer_content <- renderUI({
       # --- SECTION 2: School Details ---
       bslib::card(
         full_screen = TRUE,
-        card_header(div(strong("School Details"),
-                        tags$span(em("(Select a school from the table or map above)"),
-                                  style = "font-size: 0.7em; color: grey;"
-                        ))),
+        card_header(
+          div(
+            class = "d-flex justify-content-between align-items-center",
+            div(
+              strong("School Details"), 
+              tags$span(em("(Select a school from the table above)"), style = "font-size: 0.7em; color: grey;")
+            ),
+            # # --- NEW: Download Button ---
+            # downloadButton("download_school_profile", "Download Summary", class = "btn-sm btn-danger") 
+          )
+        ),
         card_body(
           uiOutput("build_dashboard_school_details_ui") 
         )
@@ -1574,3 +1582,78 @@ output$schooldetails_specialization <- renderTable({
   make_bold(df)
 }, striped = TRUE, hover = TRUE, bordered = TRUE, width = "100%", 
 align = 'c', colnames = FALSE, sanitize.text.function = function(x) x)
+
+
+# --- PDF/HTML DOWNLOAD HANDLER FOR DASHBOARD SCHOOL LOCATOR ---
+output$download_dashboard_school_profile <- downloadHandler(
+  filename = function() {
+    req(selected_school_data())
+    safe_name <- gsub("[^[:alnum:]]", "_", selected_school_data()$School.Name)
+    paste0("STRIDE_Profile_", safe_name, "_", Sys.Date(), ".html") # Using HTML for robustness
+  },
+  
+  content = function(file) {
+    
+    data <- selected_school_data()
+    req(nrow(data) > 0)
+    
+    # 2. Helper Function (Same as Quick Search)
+    create_filtered_table <- function(metrics, values) {
+      df <- data.frame(
+        Metric = metrics,
+        Value = as.character(values), 
+        stringsAsFactors = FALSE
+      )
+      df %>% 
+        filter(!Value %in% c("0", "N/A", "-", "", NA, "NA", "0.0", "0.00")) %>% 
+        filter(!is.na(Value))
+    }
+    
+    # 3. Prepare Data Frames (Reusing the same logic)
+    df_basic <- create_filtered_table(
+      c("School Name", "School ID", "School Head", "Position", "Curricular Offering", "Typology", "Region", "Division", "District", "Municipality", "Barangay"),
+      c(data$School.Name, data$SchoolID, data$School.Head.Name, data$SH.Position, data$Modified.COC, data$School.Size.Typology, data$Region, data$Division, data$District, data$Municipality, data$Barangay)
+    )
+    
+    df_enrol <- create_filtered_table(
+      c("Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "Total Enrolment"),
+      c(data$Kinder, data$G1, data$G2, data$G3, data$G4, data$G5, data$G6, data$G7, data$G8, data$G9, data$G10, data$G11, data$G12, data$TotalEnrolment)
+    )
+    
+    df_teachers <- create_filtered_table(
+      c("Elementary Teachers", "JHS Teachers", "SHS Teachers", "Total Teachers", "ES Shortage", "JHS Shortage", "SHS Shortage", "Total Shortage", "ES Excess", "JHS Excess", "SHS Excess", "Total Excess"),
+      c(data$ES.Teachers, data$JHS.Teachers, data$SHS.Teachers, data$TotalTeachers, data$ES.Shortage, data$JHS.Shortage, data$SHS.Shortage, data$Total.Shortage, data$ES.Excess, data$JHS.Excess, data$SHS.Excess, data$Total.Excess)
+    )
+    
+    buildable_val <- if(is.list(data$With_Buildable_space)) unlist(data$With_Buildable_space) else data$With_Buildable_space
+    df_infra <- create_filtered_table(
+      c("Total Buildings", "Total Classrooms", "Classroom Requirement", "Estimated Shortage", "Major Repairs Needed", "Shifting Schedule", "Buildable Space Available", "Electricity Source", "Water Source", "Ownership Type", "Total Seats", "Seats Shortage"),
+      c(data$Buildings, data$Instructional.Rooms.2023.2024, data$Classroom.Requirement, data$Est.CS, data$Major.Repair.2023.2024, data$Shifting, buildable_val, data$ElectricitySource, data$WaterSource, data$OwnershipType, data$Total.Seats.2023.2024, data$Total.Seats.Shortage.2023.2024)
+    )
+    
+    df_spec <- create_filtered_table(
+      c("English", "Mathematics", "Science", "Biological Sciences", "Physical Sciences", "General Education", "Araling Panlipunan", "TLE", "MAPEH", "Filipino", "ESP", "Agriculture", "ECE", "SPED"),
+      c(data$English, data$Mathematics, data$Science, data$Biological.Sciences, data$Physical.Sciences, data$General.Ed, data$Araling.Panlipunan, data$TLE, data$MAPEH, data$Filipino, data$ESP, data$Agriculture, data$ECE, data$SPED)
+    )
+    
+    # 4. Render Template
+    # We reuse the SAME template file you created for Quick Search
+    tempReport <- file.path(tempdir(), "school_profile_template.Rmd")
+    if (file.exists("school_profile_template.Rmd")) {
+      file.copy("school_profile_template.Rmd", tempReport, overwrite = TRUE)
+    } else {
+      file.copy("www/school_profile_template.Rmd", tempReport, overwrite = TRUE)
+    }
+    
+    params_list <- list(
+      school_name = data$School.Name,
+      df_basic = df_basic,
+      df_enrol = df_enrol,
+      df_teachers = df_teachers,
+      df_infra = df_infra,
+      df_spec = df_spec
+    )
+    
+    rmarkdown::render(tempReport, output_file = file, params = params_list, envir = new.env(parent = globalenv()))
+  }
+)
